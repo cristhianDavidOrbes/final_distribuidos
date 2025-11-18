@@ -1,0 +1,13 @@
+{
+  "name": "live-betting-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "services/*"
+  ],
+  "scripts": {
+    "start": "echo \"Use docker-compose up\"",
+    "lint": "echo \"add linting per service\""
+  },
+  "license": "MIT"
+}

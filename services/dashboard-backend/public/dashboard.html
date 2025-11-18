@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plataforma de Apuestas en Vivo</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+      :root {
+        --bg: #050914;
+        --bg-alt: #0f1726;
+        --card: #121b2f;
+        --card-alt: #0b1322;
+        --text: #f5f7ff;
+        --muted: #8b99b7;
+        --accent: #00e38c;
+        --accent-dark: #00b36c;
+        --secondary: #1c75ff;
+        --danger: #ff5f5f;
+        --warning: #ffaf38;
+        --border: rgba(255, 255, 255, 0.08);
+        --shadow: 0 20px 40px rgba(5, 9, 20, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: radial-gradient(circle at top, rgba(15, 87, 255, 0.25), transparent 55%),
+          radial-gradient(circle at 20% 20%, rgba(0, 227, 140, 0.2), transparent 45%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .app {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 32px 24px 48px;
+      }
+
+      .app__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .app__header h1 {
+        margin: 4px 0 0;
+        font-size: 2.4rem;
+        letter-spacing: -0.5px;
+      }
+
+      .eyebrow {
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .status {
+        text-align: right;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .status-pill::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-flex;
+        background: var(--danger);
+      }
+
+      .status-pill--online::before {
+        background: var(--accent);
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 20px 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .card__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .wallet__user-input {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      input,
+      select,
+      button {
+        font-family: inherit;
+      }
+
+      input,
+      select {
+        background: var(--card-alt);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--text);
+        width: 100%;
+      }
+
+      button {
+        cursor: pointer;
+        border: none;
+      }
+
+      .primary-btn {
+        background: linear-gradient(120deg, var(--accent), var(--secondary));
+        color: var(--bg);
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 600;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 12px 24px rgba(0, 227, 140, 0.25);
+      }
+
+      .primary-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 32px rgba(0, 227, 140, 0.35);
+      }
+
+      .link-button {
+        background: transparent;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .wallet__stats {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .stat span {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .stat strong {
+        font-size: 1.2rem;
+      }
+
+      .betslip form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 12px;
+      }
+
+      label {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .team-toggle {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .team-chip {
+        flex: 1;
+        min-width: 120px;
+        background: var(--card-alt);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 12px;
+        text-align: left;
+        color: var(--text);
+      }
+
+      .team-chip.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 12px rgba(0, 227, 140, 0.35);
+      }
+
+      .team-chip small {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+
+      .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .match-card {
+        background: var(--card-alt);
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .match-card__header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .match-card__teams {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .team-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+      }
+
+      .team-row button {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .metrics {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .metrics strong {
+        display: block;
+        color: var(--text);
+        font-size: 1rem;
+      }
+
+      .badge {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-weight: 600;
+      }
+
+      .closed-list {
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .closed-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-alt);
+        border-radius: 14px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+      }
+
+      .closed-card__winner {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .table-wrapper {
+        margin-top: 18px;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      tr.highlight {
+        background: rgba(0, 227, 140, 0.08);
+      }
+
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        min-width: 220px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      #toast.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      #toast.success {
+        border-color: rgba(0, 227, 140, 0.4);
+      }
+
+      #toast.error {
+        border-color: rgba(255, 95, 95, 0.4);
+      }
+
+      @media (max-width: 768px) {
+        .app {
+          padding: 20px 16px 32px;
+        }
+
+        .app__header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .status {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <div>
+          <p class="eyebrow">Plataforma en tiempo real</p>
+          <h1>Live Betting Exchange</h1>
+        </div>
+        <div class="status">
+          <span id="connection-pill" class="status-pill">Desconectado</span>
+          <div id="clock" class="eyebrow" style="letter-spacing: 0.1em"></div>
+        </div>
+      </header>
+
+      <section class="controls">
+        <article class="card wallet">
+          <header class="card__header">
+            <div>
+              <p class="eyebrow">Mi banca</p>
+              <h2 style="margin: 4px 0 0">Gestión de usuario</h2>
+            </div>
+            <button id="regenerate-user" class="link-button">Nuevo usuario</button>
+          </header>
+          <div class="wallet__form">
+            <label for="user-id-input">Identificador</label>
+            <div class="wallet__user-input">
+              <input id="user-id-input" type="text" maxlength="24" />
+              <button id="save-user" class="primary-btn" type="button">Guardar</button>
+            </div>
+          </div>
+          <div class="wallet__stats" id="wallet-stats">
+            <div class="stat">
+              <span>Saldo actual</span>
+              <strong>$0</strong>
+            </div>
+            <div class="stat">
+              <span>Saldo inicial</span>
+              <strong>$0</strong>
+            </div>
+            <div class="stat">
+              <span>Pendientes</span>
+              <strong>0</strong>
+            </div>
+            <div class="stat">
+              <span>Rendimiento</span>
+              <strong>$0</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="card betslip">
+          <header class="card__header">
+            <div>
+              <p class="eyebrow">Boleto de apuesta</p>
+              <h2 id="betslip-title" style="margin: 4px 0 0">Selecciona un partido</h2>
+            </div>
+          </header>
+          <form id="bet-form">
+            <div>
+              <label for="match-select">Partido abierto</label>
+              <select id="match-select">
+                <option value="">Sin partidos disponibles</option>
+              </select>
+            </div>
+            <div>
+              <label>Equipo</label>
+              <div class="team-toggle" id="team-toggle"></div>
+            </div>
+            <div>
+              <label for="bet-amount">Monto</label>
+              <input type="number" id="bet-amount" min="5" step="5" placeholder="Ej: 100" />
+            </div>
+            <button class="primary-btn" type="submit">Confirmar apuesta</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <header class="card__header">
+            <div>
+              <p class="eyebrow">Mercado en vivo</p>
+              <h2 style="margin: 4px 0 0">Partidos abiertos</h2>
+            </div>
+            <span class="badge" id="open-count">0</span>
+          </header>
+          <div class="matches-grid" id="open-matches"></div>
+        </article>
+
+        <article class="card">
+          <header class="card__header">
+            <div>
+              <p class="eyebrow">Histórico</p>
+              <h2 style="margin: 4px 0 0">Partidos cerrados</h2>
+            </div>
+          </header>
+          <div class="closed-list" id="closed-matches"></div>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top: 24px">
+        <header class="card__header">
+          <div>
+            <p class="eyebrow">Ranking</p>
+            <h2 style="margin: 4px 0 0">Usuarios destacados</h2>
+          </div>
+        </header>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Saldo</th>
+                <th>Pendientes</th>
+                <th>Ganados</th>
+                <th>Perdidos</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+      const state = {
+        matches: new Map(),
+        users: new Map(),
+        selectedTeam: null,
+      };
+
+      const dom = {
+        connection: document.getElementById('connection-pill'),
+        clock: document.getElementById('clock'),
+        walletStats: document.getElementById('wallet-stats'),
+        userInput: document.getElementById('user-id-input'),
+        saveUserBtn: document.getElementById('save-user'),
+        regenerateBtn: document.getElementById('regenerate-user'),
+        betForm: document.getElementById('bet-form'),
+        matchSelect: document.getElementById('match-select'),
+        teamToggle: document.getElementById('team-toggle'),
+        betAmount: document.getElementById('bet-amount'),
+        betSlipTitle: document.getElementById('betslip-title'),
+        openMatches: document.getElementById('open-matches'),
+        openCount: document.getElementById('open-count'),
+        closedMatches: document.getElementById('closed-matches'),
+        leaderboard: document.getElementById('leaderboard'),
+        toast: document.getElementById('toast'),
+      };
+
+      const currencyFormatter = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      });
+
+      const numberFormatter = new Intl.NumberFormat('es-CO', {
+        maximumFractionDigits: 0,
+      });
+
+      let currentUserId = localStorage.getItem('livebet:user') || generateUserId();
+      dom.userInput.value = currentUserId;
+
+      function formatCurrency(value = 0) {
+        return currencyFormatter.format(value || 0);
+      }
+
+      function formatNumber(value = 0) {
+        return numberFormatter.format(value || 0);
+      }
+
+      function generateUserId() {
+        return `player-${Math.floor(Math.random() * 9000 + 1000)}`;
+      }
+
+      function setCurrentUser(id) {
+        currentUserId = id.trim() || generateUserId();
+        localStorage.setItem('livebet:user', currentUserId);
+        dom.userInput.value = currentUserId;
+        renderWallet();
+        renderLeaderboard();
+        showToast(`Usuario activo: ${currentUserId}`, 'success');
+      }
+
+      dom.saveUserBtn.addEventListener('click', () => setCurrentUser(dom.userInput.value));
+      dom.regenerateBtn.addEventListener('click', () => setCurrentUser(generateUserId()));
+
+      dom.betForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const matchId = dom.matchSelect.value;
+        const team = state.selectedTeam;
+        const amount = Number(dom.betAmount.value);
+
+        if (!matchId) {
+          showToast('Selecciona un partido abierto', 'error');
+          return;
+        }
+        if (!team) {
+          showToast('Elige un equipo', 'error');
+          return;
+        }
+        if (!Number.isFinite(amount) || amount <= 0) {
+          showToast('Ingresa un monto válido', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/bet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: currentUserId,
+              match_id: matchId,
+              bet_on: team,
+              amount,
+            }),
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data?.error || 'Apuesta rechazada');
+          }
+
+          dom.betAmount.value = '';
+          showToast('Apuesta registrada', 'success');
+        } catch (err) {
+          showToast(err.message || 'No fue posible registrar la apuesta', 'error');
+        }
+      });
+
+      function hydrateFromSnapshot(snapshot = {}) {
+        (snapshot.matches || []).forEach((match) => upsertMatch(match));
+        (snapshot.users || []).forEach((user) => upsertUser(user));
+        renderAll();
+      }
+
+      async function fetchInitialState() {
+        try {
+          const response = await fetch('/api/state');
+          const data = await response.json();
+          hydrateFromSnapshot(data);
+        } catch (err) {
+          showToast('No se pudo sincronizar estado inicial', 'error');
+        }
+      }
+
+      function upsertMatch(match) {
+        if (!match?.match_id) return;
+        state.matches.set(match.match_id, match);
+        renderMatches();
+        updateMatchSelect();
+        updateBetSlipTitle();
+      }
+
+      function upsertUser(user) {
+        if (!user?.user_id) return;
+        state.users.set(user.user_id, user);
+        renderWallet();
+        renderLeaderboard();
+      }
+
+      function renderMatches() {
+        const matches = Array.from(state.matches.values());
+        const open = matches
+          .filter((m) => m.status === 'OPEN')
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const closed = matches
+          .filter((m) => m.status !== 'OPEN')
+          .sort(
+            (a, b) =>
+              new Date(b.closed_at || b.last_update || 0) -
+              new Date(a.closed_at || a.last_update || 0)
+          )
+          .slice(0, 8);
+
+        dom.openCount.textContent = open.length;
+        dom.openMatches.innerHTML =
+          open.length === 0
+            ? '<p style="color: var(--muted)">No hay partidos abiertos por ahora.</p>'
+            : open
+                .map((match) => {
+                  const pools = match.per_team || {};
+                  const pool = formatCurrency(match.total_pool);
+                  const bets = formatNumber(match.total_bets);
+                  const teamRows = (match.teams || []).map((team) => {
+                    const summary = pools[team] || { amount: 0, count: 0 };
+                    return `
+                      <div class="team-row">
+                        <div>
+                          <strong>${team}</strong>
+                          <small>${formatCurrency(summary.amount)} • ${formatNumber(summary.count)} apuestas</small>
+                        </div>
+                        <button type="button" data-match="${match.match_id}" data-team="${team}">Apostar</button>
+                      </div>`;
+                  });
+                  return `
+                    <article class="match-card">
+                      <div class="match-card__header">
+                        <span>#${match.match_id.slice(0, 6)}</span>
+                        <span>${bets} apuestas</span>
+                      </div>
+                      <div class="match-card__teams">
+                        ${teamRows.join('')}
+                      </div>
+                      <div class="metrics">
+                        <div>
+                          Pool
+                          <strong>${pool}</strong>
+                        </div>
+                        <div>
+                          Actualizado
+                          <strong>${new Date(match.last_update).toLocaleTimeString('es-CO')}</strong>
+                        </div>
+                      </div>
+                    </article>`;
+                })
+                .join('');
+
+        dom.closedMatches.innerHTML =
+          closed.length === 0
+            ? '<p style="color: var(--muted)">Aún no hay resultados.</p>'
+            : closed
+                .map(
+                  (match) => `
+                <article class="closed-card">
+                  <div>
+                    <strong>${match.teams?.join(' vs ')}</strong>
+                    <div style="color: var(--muted); font-size: 0.85rem;">#${match.match_id}</div>
+                  </div>
+                  <div>
+                    <div class="closed-card__winner">Ganador: ${match.winner ?? '-'}</div>
+                    <div style="color: var(--muted); font-size: 0.8rem;">Pool ${formatCurrency(match.total_pool)}</div>
+                  </div>
+                </article>`
+                )
+                .join('');
+
+        bindQuickBetButtons();
+      }
+
+      function bindQuickBetButtons() {
+        dom.openMatches
+          .querySelectorAll('button[data-match]')
+          .forEach((btn) =>
+            btn.addEventListener('click', () => {
+              const matchId = btn.getAttribute('data-match');
+              const team = btn.getAttribute('data-team');
+              dom.matchSelect.value = matchId;
+              state.selectedTeam = team;
+              updateBetSlipTitle();
+              renderTeamChips();
+              dom.betAmount.focus();
+            })
+          );
+      }
+
+      function updateMatchSelect() {
+        const open = Array.from(state.matches.values()).filter((m) => m.status === 'OPEN');
+        if (open.length === 0) {
+          dom.matchSelect.innerHTML = '<option value="">Sin partidos disponibles</option>';
+          state.selectedTeam = null;
+          renderTeamChips();
+          return;
+        }
+
+        dom.matchSelect.innerHTML = open
+          .map(
+            (match) => `
+            <option value="${match.match_id}">
+              ${match.match_id.slice(0, 6)} • ${match.teams.join(' vs ')}
+            </option>`
+          )
+          .join('');
+
+        if (!open.some((match) => match.match_id === dom.matchSelect.value)) {
+          dom.matchSelect.value = open[0].match_id;
+        }
+        renderTeamChips();
+      }
+
+      dom.matchSelect.addEventListener('change', () => {
+        state.selectedTeam = null;
+        updateBetSlipTitle();
+        renderTeamChips();
+      });
+
+      function updateBetSlipTitle() {
+        const match = state.matches.get(dom.matchSelect.value);
+        dom.betSlipTitle.textContent = match
+          ? `#${match.match_id.slice(0, 6)} • ${match.teams.join(' vs ')}`
+          : 'Selecciona un partido';
+      }
+
+      function renderTeamChips() {
+        const match = state.matches.get(dom.matchSelect.value);
+        if (!match) {
+          dom.teamToggle.innerHTML =
+            '<p style="color: var(--muted); font-size: 0.9rem;">No hay equipos disponibles.</p>';
+          return;
+        }
+
+        dom.teamToggle.innerHTML = match.teams
+          .map((team) => {
+            const summary = match.per_team?.[team] || { amount: 0, count: 0 };
+            const active = state.selectedTeam === team ? 'active' : '';
+            return `<button type="button" class="team-chip ${active}" data-team="${team}">
+                <strong>${team}</strong>
+                <small>${formatCurrency(summary.amount)} • ${formatNumber(summary.count)} apuestas</small>
+              </button>`;
+          })
+          .join('');
+
+        dom.teamToggle.querySelectorAll('button').forEach((btn) =>
+          btn.addEventListener('click', () => {
+            state.selectedTeam = btn.getAttribute('data-team');
+            renderTeamChips();
+          })
+        );
+      }
+
+      function renderWallet() {
+        const user = state.users.get(currentUserId) || {
+          user_id: currentUserId,
+          balance: 0,
+          starting_balance: 0,
+          pending_bets: 0,
+          wins: 0,
+          losses: 0,
+        };
+        const roi = user.balance - user.starting_balance;
+
+        dom.walletStats.innerHTML = `
+          <div class="stat">
+            <span>Saldo actual</span>
+            <strong>${formatCurrency(user.balance)}</strong>
+          </div>
+          <div class="stat">
+            <span>Saldo inicial</span>
+            <strong>${formatCurrency(user.starting_balance)}</strong>
+          </div>
+          <div class="stat">
+            <span>Pendientes</span>
+            <strong>${formatNumber(user.pending_bets || 0)}</strong>
+          </div>
+          <div class="stat">
+            <span>Rendimiento</span>
+            <strong style="color:${roi >= 0 ? 'var(--accent)' : 'var(--danger)'}">
+              ${formatCurrency(roi)}
+            </strong>
+          </div>
+        `;
+      }
+
+      function renderLeaderboard() {
+        const rows = Array.from(state.users.values())
+          .sort((a, b) => b.balance - a.balance)
+          .slice(0, 8)
+          .map(
+            (user) => `
+          <tr class="${user.user_id === currentUserId ? 'highlight' : ''}">
+            <td>${user.user_id}</td>
+            <td>${formatCurrency(user.balance)}</td>
+            <td>${formatNumber(user.pending_bets || 0)}</td>
+            <td>${formatNumber(user.wins || 0)}</td>
+            <td>${formatNumber(user.losses || 0)}</td>
+          </tr>`
+          )
+          .join('');
+
+        dom.leaderboard.innerHTML = rows || `<tr><td colspan="5">Sin movimientos</td></tr>`;
+      }
+
+      function renderAll() {
+        renderMatches();
+        updateMatchSelect();
+        renderTeamChips();
+        renderWallet();
+        renderLeaderboard();
+      }
+
+      function showToast(message, variant = 'info') {
+        dom.toast.textContent = message;
+        dom.toast.className = `${variant} visible`;
+        clearTimeout(dom.toast._timeout);
+        dom.toast._timeout = setTimeout(() => {
+          dom.toast.classList.remove('visible');
+        }, 2200);
+      }
+
+      function updateClock() {
+        dom.clock.textContent = new Date().toLocaleString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+      }
+
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      function connectSocket() {
+        const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+        const ws = new WebSocket(`${scheme}://${location.host}`);
+
+        ws.onopen = () => {
+          dom.connection.textContent = 'Conectado';
+          dom.connection.classList.add('status-pill--online');
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+            switch (message.type) {
+              case 'INIT':
+                hydrateFromSnapshot(message.payload);
+                break;
+              case 'MATCH':
+                upsertMatch(message.payload);
+                break;
+              case 'USER':
+                upsertUser(message.payload);
+                break;
+              case 'SYSTEM':
+                showToast(message.message || 'Feed actualizado', 'success');
+                break;
+              default:
+                break;
+            }
+          } catch (err) {
+            console.error('Mensaje inválido', err);
+          }
+        };
+
+        ws.onclose = () => {
+          dom.connection.textContent = 'Reconectando...';
+          dom.connection.classList.remove('status-pill--online');
+          setTimeout(connectSocket, 2000);
+        };
+      }
+
+      fetchInitialState().then(connectSocket);
+    </script>
+  </body>
+</html>

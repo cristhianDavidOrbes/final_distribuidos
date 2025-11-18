@@ -1,0 +1,136 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    environment:
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_NODE_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_MIN_INSYNC_REPLICAS=1
+      - KAFKA_LOG_DIRS=/tmp/kraft-combined-logs
+      - KAFKA_CLUSTER_ID=O8YiQ2ujS1CQMXpYJ5xLpQ
+      - CLUSTER_ID=O8YiQ2ujS1CQMXpYJ5xLpQ
+    ports:
+      - '9092:9092'
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: infra/rabbitmq/Dockerfile
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  match-generator:
+    build:
+      context: .
+      dockerfile: services/match-generator/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MATCH_GENERATE_INTERVAL_MS=10000
+      - MATCH_DURATION_MS=60000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  betting-api:
+    build:
+      context: .
+      dockerfile: services/betting-api/Dockerfile
+    ports:
+      - '8080:8080'
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - PORT=8080
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  match-simulator:
+    build:
+      context: .
+      dockerfile: services/match-simulator/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      kafka:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  results-engine:
+    build:
+      context: .
+      dockerfile: services/results-engine/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      kafka:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  dashboard-backend:
+    build:
+      context: .
+      dockerfile: services/dashboard-backend/Dockerfile
+    ports:
+      - '5500:5500'
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - PORT=5500
+      - BETTING_API_URL=http://betting-api:8080/bet
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  email-worker:
+    build:
+      context: .
+      dockerfile: services/email-worker/Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  betting-bot:
+    build:
+      context: .
+      dockerfile: services/betting-bot/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - BETTING_API_URL=http://betting-api:8080/bet
+      - BOT_USERS=bot-01,bot-02,bot-03,bot-04,bot-05
+      - BOT_BETS_PER_MATCH=4
+      - BOT_MIN_AMOUNT=25
+      - BOT_MAX_AMOUNT=150
+      - BOT_MAX_DELAY_MS=30000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      betting-api:
+        condition: service_started

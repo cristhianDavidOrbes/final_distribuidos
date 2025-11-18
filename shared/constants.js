@@ -1,0 +1,30 @@
+const MATCH_EVENTS_TOPIC = process.env.MATCH_EVENTS_TOPIC || 'match_events';
+const MATCH_TIMERS_EXCHANGE = process.env.MATCH_TIMERS_EXCHANGE || 'match_timers';
+const MATCH_SIMULATION_QUEUE = process.env.MATCH_SIMULATION_QUEUE || 'match_simulation_queue';
+const MATCH_SIMULATION_ROUTING_KEY =
+  process.env.MATCH_SIMULATION_ROUTING_KEY || 'match.simulate';
+const NOTIFICATIONS_EXCHANGE = process.env.NOTIFICATIONS_EXCHANGE || 'notifications';
+
+const EVENT_TYPES = {
+  MATCH_CREATED: 'MATCH_CREATED',
+  BET_PLACED: 'BET_PLACED',
+  MATCH_FINISHED: 'MATCH_FINISHED',
+};
+
+const DASHBOARD_ROUTING_KEY = 'notify.dashboard.update';
+const USER_BALANCE_ROUTING_KEY = 'notify.dashboard.user';
+const EMAIL_WIN_ROUTING_KEY = 'notify.email.win';
+const EMAIL_LOSS_ROUTING_KEY = 'notify.email.loss';
+
+module.exports = {
+  MATCH_EVENTS_TOPIC,
+  MATCH_TIMERS_EXCHANGE,
+  MATCH_SIMULATION_QUEUE,
+  MATCH_SIMULATION_ROUTING_KEY,
+  NOTIFICATIONS_EXCHANGE,
+  EVENT_TYPES,
+  DASHBOARD_ROUTING_KEY,
+  USER_BALANCE_ROUTING_KEY,
+  EMAIL_WIN_ROUTING_KEY,
+  EMAIL_LOSS_ROUTING_KEY,
+};
